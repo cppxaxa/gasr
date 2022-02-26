@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
-import ctypes
-from soda_api_pb2 import SerializedSodaConfigMsg, SodaResponse, SodaRecognitionResult
+import ctypes, json
+from soda_api_pb2 import ExtendedSodaConfigMsg, SodaResponse, SodaRecognitionResult, SodaEndpointEvent
 
 CHANNEL_COUNT = 1
 SAMPLE_RATE = 16000
@@ -22,7 +22,7 @@ class SodaClient():
             callback = CALLBACK(self.resultHandler)
         else:
             callback = CALLBACK(callback)
-        cfg_proto = SerializedSodaConfigMsg()
+        cfg_proto = ExtendedSodaConfigMsg()
         cfg_proto.channel_count = CHANNEL_COUNT
         cfg_proto.sample_rate = SAMPLE_RATE
         cfg_proto.api_key = 'dummy_api_key'
@@ -43,11 +43,15 @@ class SodaClient():
     def resultHandler(self, response, rlen, instance):
         res = SodaResponse()
         res.ParseFromString(ctypes.string_at(response, rlen))
+        if res.endpoint_event is not None and res.endpoint_event.endpoint_type != SodaEndpointEvent.EndpointType.UNKNOWN:
+            print("\n[INFO]", SodaEndpointEvent.EndpointType.Name(res.endpoint_event.endpoint_type), '\n')
         if res.soda_type == SodaResponse.SodaMessageType.RECOGNITION:
             if res.recognition_result.result_type == SodaRecognitionResult.ResultType.FINAL:
-                print(f'* {res.recognition_result.hypothesis[0]}')
+                #print(f'* {res.recognition_result.hypothesis[0]}')
+                print("\n[INFO] FINAL:", res.recognition_result.hypothesis[0], '\n')
             elif res.recognition_result.result_type == SodaRecognitionResult.ResultType.PARTIAL:
-                print(f'* {res.recognition_result.hypothesis[0]}', end='\r')
+                #print(f'* {res.recognition_result.hypothesis[0]}', end='\r')
+                print("\n[INFO] PARTIAL:", res.recognition_result.hypothesis[0], '\n')
 
 
 if __name__ == '__main__':

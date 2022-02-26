@@ -1,5 +1,6 @@
 # gasr
 Google Chrome SODA Offline Speech Recognition command line client
+Python client is updated for the chrome 98.0.4758.102
 
 ##### Intro:
 This is a proof of concept how to write code against the libsoda library found in the Chrome browser, which uses it for Live Transcribe.
